@@ -173,7 +173,7 @@
         }
 
         .progress-bar {
-            background-color: var(--progress-bar-fill);
+            background: linear-gradient(to right, #2ECFB9, #5B9CF7);
             height: 100%;
             width: 0;
             border-radius: 20px;
@@ -333,17 +333,57 @@
         }
         
         /* Progress Update Modal Specifics */
-        #update-progress-slider {
-            width: 100%;
-            cursor: pointer;
-            accent-color: var(--accent-color);
+        .progress-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 5px;
         }
-        #progress-value-display {
+
+        .progress-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background-color: var(--tab-bg-color);
+            color: var(--primary-text-color);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding-bottom: 4px; /* Optical alignment */
+            transition: background-color 0.2s;
+        }
+        .progress-btn:hover {
+            background-color: #dce3ec;
+        }
+
+        .progress-input {
+            width: 120px;
+            height: 60px;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--primary-text-color);
-            margin-bottom: 15px;
+            border: none;
+            background: transparent;
+            -moz-appearance: textfield; /* Firefox */
+        }
+        .progress-input::-webkit-outer-spin-button,
+        .progress-input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        .progress-total-display {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 20px;
         }
 
         /* Manage List Modal Specifics */
@@ -435,10 +475,12 @@
         <div class="modal-content">
             <h2 id="update-modal-title">تحديث التقدم</h2>
             <form id="update-progress-form">
-                <p id="progress-value-display">0 / 0</p>
-                <div class="form-group">
-                    <input type="range" id="update-progress-slider" min="0" value="0">
+                <div class="progress-input-container">
+                    <button type="button" class="progress-btn" id="decrement-progress-btn">-</button>
+                    <input type="number" id="progress-input" class="progress-input" min="0">
+                    <button type="button" class="progress-btn" id="increment-progress-btn">+</button>
                 </div>
+                <p id="progress-total-display" class="progress-total-display">/ 0 درس</p>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-close>إغلاق</button>
                     <button type="submit" class="btn btn-primary">حفظ</button>
@@ -502,8 +544,10 @@
             
             const updateProgressForm = document.getElementById('update-progress-form');
             const updateModalTitle = document.getElementById('update-modal-title');
-            const progressValueDisplay = document.getElementById('progress-value-display');
-            const progressSlider = document.getElementById('update-progress-slider');
+            const progressInput = document.getElementById('progress-input');
+            const incrementProgressBtn = document.getElementById('increment-progress-btn');
+            const decrementProgressBtn = document.getElementById('decrement-progress-btn');
+            const progressTotalDisplay = document.getElementById('progress-total-display');
             
             const manageListItemsContainer = document.getElementById('manage-list-items');
             const saveMyListBtn = document.getElementById('save-my-list-btn');
@@ -669,9 +713,10 @@
                 if (!subject) return;
 
                 updateModalTitle.textContent = `${subject.name}`;
-                progressSlider.max = subject.total;
-                progressSlider.value = subject.completed;
-                progressValueDisplay.textContent = `${subject.completed} / ${subject.total} ${subject.unit}`;
+                progressInput.value = subject.completed;
+                progressInput.max = subject.total;
+                progressInput.min = 0;
+                progressTotalDisplay.textContent = `/ ${subject.total} ${subject.unit}`;
                 openModal(updateProgressModal);
             };
             
@@ -755,7 +800,13 @@
                 e.preventDefault();
                 const subject = subjects.find(s => s.id === editingSubjectId);
                 if (subject) {
-                    subject.completed = parseInt(progressSlider.value);
+                    let newValue = parseInt(progressInput.value);
+                    if (isNaN(newValue) || newValue < 0) {
+                        newValue = 0;
+                    } else if (newValue > subject.total) {
+                        newValue = subject.total;
+                    }
+                    subject.completed = newValue;
                     subject.lastUpdated = Date.now();
                     saveData();
                     render();
@@ -763,10 +814,33 @@
                 closeModal(updateProgressModal);
             });
             
-            progressSlider.addEventListener('input', () => {
-                const subject = subjects.find(s => s.id === editingSubjectId);
-                if (subject) {
-                    progressValueDisplay.textContent = `${progressSlider.value} / ${subject.total} ${subject.unit}`;
+            incrementProgressBtn.addEventListener('click', () => {
+                const currentValue = parseInt(progressInput.value);
+                const maxValue = parseInt(progressInput.max);
+                if (!isNaN(currentValue) && currentValue < maxValue) {
+                    progressInput.value = currentValue + 1;
+                }
+            });
+
+            decrementProgressBtn.addEventListener('click', () => {
+                const currentValue = parseInt(progressInput.value);
+                const minValue = parseInt(progressInput.min);
+                if (!isNaN(currentValue) && currentValue > minValue) {
+                    progressInput.value = currentValue - 1;
+                }
+            });
+
+            progressInput.addEventListener('input', () => {
+                let value = parseInt(progressInput.value);
+                const min = parseInt(progressInput.min);
+                const max = parseInt(progressInput.max);
+
+                if (isNaN(value)) return;
+
+                if (value < min) {
+                    progressInput.value = min;
+                } else if (value > max) {
+                    progressInput.value = max;
                 }
             });
 
