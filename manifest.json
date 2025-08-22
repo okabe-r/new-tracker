@@ -1,0 +1,21 @@
+{
+  "short_name": "متتبع التقدم",
+  "name": "متتبع التقدم",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/okabe-r/image/refs/heads/main/Telegram_GH6IQqemtI.png?token=GHSAT0AAAAAAC77URNENIV7GRA64ILLIPOM2FIX4LA",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/okabe-r/image/refs/heads/main/Telegram_GH6IQqemtI.png?token=GHSAT0AAAAAAC77URNENIV7GRA64ILLIPOM2FIX4LA",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#f0f4f8",
+  "background_color": "#ffffff",
+  "lang": "ar"
+}
