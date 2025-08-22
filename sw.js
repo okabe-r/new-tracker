@@ -5,7 +5,7 @@ const CACHE_NAME = 'progress-tracker-cache-v1';
 const urlsToCache = [
   './',
   './index.html',
-  'https://raw.githubusercontent.com/okabe-r/image/refs/heads/main/Telegram_GH6IQqemtI.png?token=GHSAT0AAAAAAC77URNENIV7GRA64ILLIPOM2FIX4LA'
+  'https://i.postimg.cc/47szXgWh/image.png'
 ];
 
 // 1. On install, open the cache and add the core application files.
