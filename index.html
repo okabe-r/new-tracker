@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متتبع التقدم</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="https://raw.githubusercontent.com/okabe-r/image/refs/heads/main/Telegram_GH6IQqemtI.png?token=GHSAT0AAAAAAC77URNENIV7GRA64ILLIPOM2FIX4LA">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/okabe-r/image/refs/heads/main/Telegram_GH6IQqemtI.png?token=GHSAT0AAAAAAC77URNENIV7GRA64ILLIPOM2FIX4LA">
+    <meta name="theme-color" content="#f0f4f8">
     <style>
         /* --- General Styles & Variables --- */
         :root {
@@ -810,6 +814,17 @@
             // --- Initial Load ---
             loadData();
             render();
+
+            // PWA Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js').then(registration => {
+                        console.log('ServiceWorker registered with scope: ', registration.scope);
+                    }).catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+                });
+            }
         });
     </script>
 </body>
