@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متتبع التقدم</title>
+    <style>
+        /* --- General Styles & Variables --- */
+        :root {
+            --bg-color: #f0f4f8;
+            --card-color: #ffffff;
+            --primary-text-color: #2a3a4a;
+            --secondary-text-color: #8c96a3;
+            --border-color: #e9eef5;
+            --danger-color: #e74c3c;
+            --accent-color: #27b3a5;
+            --tab-bg-color: #e9eef5;
+            --tab-active-text-color: #0d6efd;
+            --progress-bar-bg: #e9ecef;
+            --progress-bar-fill: #adb5bd;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* --- Header & Tabs --- */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+        
+        header p {
+            color: var(--secondary-text-color);
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 30px;
+            background-color: var(--tab-bg-color);
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary-text-color);
+        }
+        
+        .tab-btn.active {
+            color: var(--tab-active-text-color);
+            background-color: var(--card-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            font-weight: 700;
+        }
+
+
+        /* --- Subject List & Cards --- */
+        #subjects-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .subject-card {
+            background-color: var(--card-color);
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .subject-card:hover {
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-actions button {
+            background: none;
+            border: none;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .card-actions button:hover {
+            color: var(--primary-text-color);
+        }
+        
+        .card-actions button svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+        
+        .pin-btn.pinned {
+            color: var(--tab-active-text-color);
+        }
+
+        .progress-bar-container {
+            background-color: var(--progress-bar-bg);
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            background-color: var(--progress-bar-fill);
+            height: 100%;
+            width: 0;
+            border-radius: 20px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--secondary-text-color);
+        }
+
+        /* --- Empty State --- */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-text-color);
+            background-color: var(--card-color);
+            border-radius: 12px;
+        }
+
+        .empty-state p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--tab-active-text-color);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background-color: var(--tab-bg-color);
+            color: var(--primary-text-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+
+        #add-subject-btn {
+            display: none; /* Hidden to match provided image */
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: #fff;
+            font-size: 2rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        #add-subject-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        #manage-my-list-btn {
+            display: none; /* Hidden to match provided image */
+            margin: 20px auto 0;
+            width: fit-content;
+        }
+
+        /* --- Modals --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--card-color);
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: var(--primary-text-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary-text-color);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--primary-text-color);
+            font-size: 1rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Progress Update Modal Specifics */
+        #update-progress-slider {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+        #progress-value-display {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-text-color);
+            margin-bottom: 15px;
+        }
+
+        /* Manage List Modal Specifics */
+        #manage-list-items {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .manage-list-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            gap: 15px;
+        }
+        .manage-list-item:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .manage-list-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--tab-active-text-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+            header h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>متتبع التقدم</h1>
+            <p>تقدمك، محفوظ على جهازك.</p>
+        </header>
+
+        <div class="tabs">
+            <button id="all-view-btn" class="tab-btn active">الكل</button>
+            <button id="my-list-view-btn" class="tab-btn">قائمتي</button>
+        </div>
+
+        <div id="subjects-list">
+            <!-- Subject cards will be injected here by JavaScript -->
+        </div>
+        
+        <button id="manage-my-list-btn" class="btn btn-secondary">إدارة قائمتي</button>
+    </div>
+
+    <button id="add-subject-btn" title="إضافة مادة جديدة">+</button>
+
+    <!-- Modals -->
+
+    <!-- Add/Edit Subject Modal -->
+    <div id="add-edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title">إضافة مادة جديدة</h2>
+            <form id="add-edit-form">
+                <div class="form-group">
+                    <label for="subject-name">اسم المادة</label>
+                    <input type="text" id="subject-name" required placeholder="مثال: شرح نخبة الفكر">
+                </div>
+                <div class="form-group">
+                    <label for="subject-total">إجمالي الوحدات</label>
+                    <input type="number" id="subject-total" required min="1" placeholder="مثال: 6">
+                </div>
+                <div class="form-group">
+                    <label for="subject-unit">اسم الوحدة</label>
+                    <input type="text" id="subject-unit" required placeholder="مثال: درس">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" id="delete-subject-btn">حذف</button>
+                    <button type="button" class="btn btn-secondary" data-close>إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Update Progress Modal -->
+    <div id="update-progress-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="update-modal-title">تحديث التقدم</h2>
+            <form id="update-progress-form">
+                <p id="progress-value-display">0 / 0</p>
+                <div class="form-group">
+                    <input type="range" id="update-progress-slider" min="0" value="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close>إغلاق</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Manage My List Modal -->
+    <div id="manage-list-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>إدارة قائمتي</h2>
+            <p style="color: var(--secondary-text-color); margin-bottom: 15px;">اختر المواد التي تريد عرضها في "قائمتي".</p>
+            <div id="manage-list-items">
+                <!-- Checkbox list will be injected here -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" data-close>إلغاء</button>
+                <button type="button" id="save-my-list-btn" class="btn btn-primary">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirm Delete Modal -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>تأكيد الحذف</h2>
+            <p>هل أنت متأكد من أنك تريد حذف هذه المادة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="confirm-cancel-btn">إلغاء</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">نعم، احذف</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const subjectsList = document.getElementById('subjects-list');
+            const addSubjectBtn = document.getElementById('add-subject-btn');
+            
+            // Views
+            const allViewBtn = document.getElementById('all-view-btn');
+            const myListViewBtn = document.getElementById('my-list-view-btn');
+            const manageMyListBtn = document.getElementById('manage-my-list-btn');
+
+            // Modals
+            const addEditModal = document.getElementById('add-edit-modal');
+            const updateProgressModal = document.getElementById('update-progress-modal');
+            const manageListModal = document.getElementById('manage-list-modal');
+            const confirmModal = document.getElementById('confirm-modal');
+            
+            // Forms & Inputs
+            const addEditForm = document.getElementById('add-edit-form');
+            const modalTitle = document.getElementById('modal-title');
+            const subjectNameInput = document.getElementById('subject-name');
+            const subjectTotalInput = document.getElementById('subject-total');
+            const subjectUnitInput = document.getElementById('subject-unit');
+            const deleteSubjectBtn = document.getElementById('delete-subject-btn');
+            
+            const updateProgressForm = document.getElementById('update-progress-form');
+            const updateModalTitle = document.getElementById('update-modal-title');
+            const progressValueDisplay = document.getElementById('progress-value-display');
+            const progressSlider = document.getElementById('update-progress-slider');
+            
+            const manageListItemsContainer = document.getElementById('manage-list-items');
+            const saveMyListBtn = document.getElementById('save-my-list-btn');
+            
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+
+
+            // --- State ---
+            let subjects = [];
+            let currentView = 'all'; // 'all' or 'myList'
+            let editingSubjectId = null;
+            let subjectToDeleteId = null;
+            
+            // --- Initial Data ---
+            const initialSubjects = [
+                { name: 'المحاضرة الأولى من "الشرح المطول على نزهة النظر"', total: 1, unit: 'درس' },
+                { name: 'سلسلة "المداخل الأولية إلى علم الحديث"', total: 2, unit: 'درس' },
+                { name: 'محاضرة "التأسيس الحديثي"', total: 1, unit: 'درس' },
+                { name: 'الشرح القديم على البيقونية', total: 5, unit: 'درس' },
+                { name: 'سلسلة "شرح نخبة الفكر"', total: 6, unit: 'درس' },
+                { name: 'حفظ "عمدة الأحكام"', total: 241, unit: 'صفحة' },
+                { name: 'كتاب "المدخل إلى علم الحديث"', total: 214, unit: 'صفحة' },
+                { name: 'سلسلة "الحملة البريطانية على مصر"', total: 60, unit: 'درس' },
+                { name: 'سلسلة "جرعة وعي إلى الجيل الصاعد"', total: 3, unit: 'درس' },
+                { name: 'محاضرة "العلم بالله"', total: 1, unit: 'درس' },
+                { name: 'محاضرة "أتدري ما الله؟"', total: 1, unit: 'درس' },
+                { name: 'محاضرة "السر الأعظم"', total: 1, unit: 'درس' },
+                { name: 'كتاب "تفسير السعدي"', total: 17, unit: 'سورة' },
+                { name: 'مراجعة محفوظ "نظم الآجرومية"', total: 150, unit: 'بيت' },
+                { name: 'سلسلة "شرح نظم المعين على فهم تطبيقات المحدثين"', total: 7, unit: 'درس' },
+                { name: 'سلسلة "مدخل إلى فقه الحديث"', total: 3, unit: 'درس' },
+                { name: 'سلسلة "غيث الساري من هدايات البخاري"', total: 26, unit: 'درس' },
+                { name: 'كتاب "الفكر المنجي عند المحدثين"', total: 178, unit: 'صفحة' },
+                { name: 'سلسلة "مصدر التلقي والمعرفة"', total: 7, unit: 'درس' },
+                { name: 'سلسلة "الأسماء الحسنى"', total: 20, unit: 'درس' },
+                { name: 'محاضرة "المنهج الحديثي بين المتقدمين والمتأخرين"', total: 1, unit: 'درس' },
+                { name: 'كتاب "مناهج المحدثين"', total: 259, unit: 'صفحة' },
+                { name: 'كتاب "أفي السنة شك"', total: 93, unit: 'صفحة' },
+                { name: 'حفظ نظم "المعين على فهم تطبيقات المحدثين"', total: 153, unit: 'بيت' },
+                { name: 'كتاب "شرح منظومة لغة المحدث"', total: 469, unit: 'صفحة' },
+                { name: 'الشرح الجديد على البيقونية', total: 2, unit: 'درسان' },
+                { name: 'سلسلة "إحياء منهاج النبوة"', total: 6, unit: 'درس' },
+            ].map((subject, index) => ({
+                ...subject,
+                id: Date.now() + index,
+                completed: 0,
+                pinned: false,
+                inMyList: false,
+                lastUpdated: Date.now() + index,
+            }));
+
+            // --- Data Persistence ---
+            const loadData = () => {
+                let data = localStorage.getItem('progressTrackerSubjects');
+                if (!data || JSON.parse(data).length === 0) {
+                    subjects = initialSubjects.reverse(); // Reverse to show last items first
+                    saveData();
+                } else {
+                    subjects = JSON.parse(data);
+                }
+            };
+
+            const saveData = () => {
+                localStorage.setItem('progressTrackerSubjects', JSON.stringify(subjects));
+            };
+            
+            // --- Core Functions ---
+            const render = () => {
+                subjectsList.innerHTML = '';
+                
+                const subjectsToDisplay = subjects.filter(subject => currentView === 'myList' ? subject.inMyList : true);
+
+                subjectsToDisplay.sort((a, b) => {
+                    if (a.pinned && !b.pinned) return -1;
+                    if (!a.pinned && b.pinned) return 1;
+                    return (b.lastUpdated || 0) - (a.lastUpdated || 0);
+                });
+                
+                if (subjectsToDisplay.length === 0) {
+                    let message = '';
+                    if (currentView === 'all' && subjects.length === 0) {
+                        message = `<div class="empty-state"><p>لا توجد لديك مواد بعد.</p><p>انقر على زر '+' في الأسفل لإضافة مادة جديدة.</p></div>`;
+                    } else if (currentView === 'myList') {
+                         message = `<div class="empty-state"><p>"قائمتي" فارغة.</p><p>انقر على "إدارة قائمتي" لإضافة مواد إليها.</p></div>`;
+                    }
+                    subjectsList.innerHTML = message;
+                }
+
+                subjectsToDisplay.forEach(subject => {
+                    const percentage = subject.total > 0 ? (subject.completed / subject.total) * 100 : 0;
+                    const card = document.createElement('div');
+                    card.className = 'subject-card';
+                    card.dataset.id = subject.id;
+
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <h3 class="card-title">${subject.name}</h3>
+                            <div class="card-actions">
+                                 <button data-action="delete" title="حذف">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                                 </button>
+                                <button data-action="edit" title="تعديل">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+                                </button>
+                                <button class="pin-btn ${subject.pinned ? 'pinned' : ''}" data-action="pin" title="تثبيت">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 4v5c0 1.12.37 2.16 1 3H9c.63-.84 1-1.88 1-3V4h4m3-2H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1.03 1.03L13 22v-7h5.97v-2c-1.66 0-3-1.34-3-3V4h1c.55 0 1-.45 1-1s-.45-1-1-1z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${percentage}%;"></div>
+                        </div>
+                        <div class="progress-details">
+                            <span>${subject.completed} / ${subject.total} ${subject.unit}</span>
+                            <span>${Math.round(percentage)}%</span>
+                        </div>
+                    `;
+                    subjectsList.appendChild(card);
+                });
+                
+                updateViewUI();
+            };
+
+            const updateViewUI = () => {
+                if (currentView === 'all') {
+                    allViewBtn.classList.add('active');
+                    myListViewBtn.classList.remove('active');
+                    manageMyListBtn.style.display = 'none';
+                } else {
+                    allViewBtn.classList.remove('active');
+                    myListViewBtn.classList.add('active');
+                    manageMyListBtn.style.display = 'block';
+                }
+            };
+            
+            // --- Modal Management ---
+            const openModal = (modal) => modal.classList.add('visible');
+            const closeModal = (modal) => modal.classList.remove('visible');
+
+            const openAddEditModal = (mode, subjectId = null) => {
+                addEditForm.reset();
+                if (mode === 'add') {
+                    editingSubjectId = null;
+                    modalTitle.textContent = 'إضافة مادة جديدة';
+                    deleteSubjectBtn.style.display = 'none';
+                } else { // 'edit' mode
+                    editingSubjectId = subjectId;
+                    const subject = subjects.find(s => s.id === subjectId);
+                    if (!subject) return;
+                    modalTitle.textContent = 'تعديل المادة';
+                    subjectNameInput.value = subject.name;
+                    subjectTotalInput.value = subject.total;
+                    subjectUnitInput.value = subject.unit;
+                    deleteSubjectBtn.style.display = 'inline-block';
+                }
+                openModal(addEditModal);
+            };
+
+            const openUpdateProgressModal = (subjectId) => {
+                editingSubjectId = subjectId;
+                const subject = subjects.find(s => s.id === subjectId);
+                if (!subject) return;
+
+                updateModalTitle.textContent = `${subject.name}`;
+                progressSlider.max = subject.total;
+                progressSlider.value = subject.completed;
+                progressValueDisplay.textContent = `${subject.completed} / ${subject.total} ${subject.unit}`;
+                openModal(updateProgressModal);
+            };
+            
+            const openManageListModal = () => {
+                manageListItemsContainer.innerHTML = '';
+                subjects.forEach(subject => {
+                    const itemHTML = `
+                        <div class="manage-list-item">
+                            <input type="checkbox" id="item-${subject.id}" data-id="${subject.id}" ${subject.inMyList ? 'checked' : ''}>
+                            <label for="item-${subject.id}">${subject.name}</label>
+                        </div>
+                    `;
+                    manageListItemsContainer.innerHTML += itemHTML;
+                });
+                openModal(manageListModal);
+            };
+
+            // --- Event Handlers ---
+
+            allViewBtn.addEventListener('click', () => { currentView = 'all'; render(); });
+            myListViewBtn.addEventListener('click', () => { currentView = 'myList'; render(); });
+            manageMyListBtn.addEventListener('click', openManageListModal);
+            addSubjectBtn.addEventListener('click', () => openAddEditModal('add'));
+
+            subjectsList.addEventListener('click', (e) => {
+                const card = e.target.closest('.subject-card');
+                if (!card) return;
+                
+                const subjectId = Number(card.dataset.id);
+                const actionBtn = e.target.closest('button');
+                const action = actionBtn ? actionBtn.dataset.action : null;
+
+                if (action === 'edit') {
+                    openAddEditModal('edit', subjectId);
+                } else if (action === 'pin') {
+                    const subject = subjects.find(s => s.id === subjectId);
+                    if (subject) {
+                        subject.pinned = !subject.pinned;
+                        subject.lastUpdated = Date.now();
+                        saveData();
+                        render();
+                    }
+                } else if (action === 'delete') {
+                    subjectToDeleteId = subjectId;
+                    openModal(confirmModal);
+                } else {
+                    openUpdateProgressModal(subjectId);
+                }
+            });
+
+            addEditForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = subjectNameInput.value.trim();
+                const total = parseInt(subjectTotalInput.value);
+                const unit = subjectUnitInput.value.trim();
+
+                if (!name || !unit || isNaN(total) || total < 1) return;
+
+                if (editingSubjectId) {
+                    const subject = subjects.find(s => s.id === editingSubjectId);
+                    if (subject) {
+                        subject.name = name;
+                        subject.total = total;
+                        subject.unit = unit;
+                        subject.lastUpdated = Date.now();
+                        if (subject.completed > total) subject.completed = total;
+                    }
+                } else {
+                    const newSubject = {
+                        id: Date.now(), name, total, unit,
+                        completed: 0, pinned: false, inMyList: false, lastUpdated: Date.now(),
+                    };
+                    subjects.push(newSubject);
+                }
+                saveData();
+                render();
+                closeModal(addEditModal);
+            });
+
+            updateProgressForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const subject = subjects.find(s => s.id === editingSubjectId);
+                if (subject) {
+                    subject.completed = parseInt(progressSlider.value);
+                    subject.lastUpdated = Date.now();
+                    saveData();
+                    render();
+                }
+                closeModal(updateProgressModal);
+            });
+            
+            progressSlider.addEventListener('input', () => {
+                const subject = subjects.find(s => s.id === editingSubjectId);
+                if (subject) {
+                    progressValueDisplay.textContent = `${progressSlider.value} / ${subject.total} ${subject.unit}`;
+                }
+            });
+
+            deleteSubjectBtn.addEventListener('click', () => {
+                subjectToDeleteId = editingSubjectId;
+                openModal(confirmModal);
+            });
+            
+            confirmDeleteBtn.addEventListener('click', () => {
+                if (subjectToDeleteId) {
+                    subjects = subjects.filter(s => s.id !== subjectToDeleteId);
+                    saveData();
+                    render();
+                    subjectToDeleteId = null;
+                    closeModal(confirmModal);
+                    closeModal(addEditModal);
+                }
+            });
+
+            confirmCancelBtn.addEventListener('click', () => {
+                subjectToDeleteId = null;
+                closeModal(confirmModal);
+            });
+            
+            saveMyListBtn.addEventListener('click', () => {
+                const checkboxes = manageListItemsContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    const subjectId = Number(checkbox.dataset.id);
+                    const subject = subjects.find(s => s.id === subjectId);
+                    if(subject) subject.inMyList = checkbox.checked;
+                });
+                saveData();
+                render();
+                closeModal(manageListModal);
+            });
+
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal || e.target.hasAttribute('data-close')) {
+                        closeModal(modal);
+                    }
+                });
+            });
+
+            // --- Initial Load ---
+            loadData();
+            render();
+        });
+    </script>
+</body>
+</html>
