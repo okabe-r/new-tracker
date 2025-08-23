@@ -62,11 +62,19 @@
             margin-top: 5px;
             font-size: 1rem;
         }
+        
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
 
         .tabs {
             display: flex;
             gap: 5px;
-            margin-bottom: 30px;
+            flex-grow: 1;
             background-color: var(--tab-bg-color);
             border-radius: 12px;
             padding: 5px;
@@ -94,6 +102,44 @@
             background-color: var(--card-color);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             font-weight: 700;
+        }
+        
+        #filter-btn {
+            background: var(--tab-bg-color);
+            border: none;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            color: var(--secondary-text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            transition: color 0.3s, background-color 0.3s;
+        }
+        #filter-btn:hover {
+            background-color: #dce3ec;
+        }
+        #filter-btn.active {
+            color: var(--tab-active-text-color);
+            background-color: transparent;
+            box-shadow: none;
+        }
+        #filter-btn.active:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        #filter-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        #filter-btn svg path {
+            transition: fill 0.2s ease-in-out;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+        #filter-btn.active svg path {
+            fill: currentColor;
         }
 
 
@@ -257,7 +303,7 @@
         }
         
         #manage-my-list-btn {
-            display: none; /* Hidden to match provided image */
+            display: none;
             margin: 20px auto 0;
             width: fit-content;
         }
@@ -315,7 +361,7 @@
             font-weight: 500;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
             background-color: var(--bg-color);
@@ -323,6 +369,7 @@
             border-radius: 8px;
             color: var(--primary-text-color);
             font-size: 1rem;
+            font-family: inherit;
         }
         
         .modal-actions {
@@ -409,6 +456,36 @@
             accent-color: var(--tab-active-text-color);
         }
 
+        /* Filter Modal Specifics */
+        .filter-section {
+            margin-bottom: 20px;
+        }
+        .filter-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--primary-text-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .filter-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--tab-active-text-color);
+        }
+        .filter-option label {
+            cursor: pointer;
+        }
+
         /* Responsive Design */
         @media (max-width: 600px) {
             .container {
@@ -416,6 +493,9 @@
             }
             header h1 {
                 font-size: 2.2rem;
+            }
+            .tab-btn, #filter-btn {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -428,10 +508,18 @@
             <p>تقدمك، محفوظ على جهازك.</p>
         </header>
 
-        <div class="tabs">
-            <button id="all-view-btn" class="tab-btn active">الكل</button>
-            <button id="my-list-view-btn" class="tab-btn">قائمتي</button>
+        <div class="controls-container">
+            <div class="tabs">
+                <button id="all-view-btn" class="tab-btn active">الكل</button>
+                <button id="my-list-view-btn" class="tab-btn">قائمتي</button>
+            </div>
+            <button id="filter-btn" title="تصفية">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M3 4H21L14 12V18L10 20V12L3 4Z" />
+                </svg>
+            </button>
         </div>
+
 
         <div id="subjects-list">
             <!-- Subject cards will be injected here by JavaScript -->
@@ -460,6 +548,23 @@
                 <div class="form-group">
                     <label for="subject-unit">اسم الوحدة</label>
                     <input type="text" id="subject-unit" required placeholder="مثال: درس">
+                </div>
+                <div class="form-group">
+                    <label for="subject-department">قسم المادة</label>
+                    <select id="subject-department" required>
+                        <option value="sharia">القسم الشرعي</option>
+                        <option value="reform">قسم المنهج الإصلاحي/الثقافي</option>
+                        <option value="spiritual">القسم التزكوي</option>
+                        <option value="review">قسم المراجعة</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="subject-type">نوع المادة</label>
+                    <select id="subject-type" required>
+                        <option value="video">مرئي/مسموع</option>
+                        <option value="read">مقروء</option>
+                        <option value="memo">محفوظ</option>
+                    </select>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-danger" id="delete-subject-btn">حذف</button>
@@ -504,6 +609,70 @@
         </div>
     </div>
     
+    <!-- Filter Modal -->
+    <div id="filter-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>تصفية المواد</h2>
+            <form id="filter-form">
+                <div class="filter-section">
+                    <h3>حسب قسم المادة</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-dep-sharia" value="sharia" checked>
+                            <label for="filter-dep-sharia">القسم الشرعي</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-dep-reform" value="reform" checked>
+                            <label for="filter-dep-reform">قسم المنهج الإصلاحي/الثقافي</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-dep-spiritual" value="spiritual" checked>
+                            <label for="filter-dep-spiritual">القسم التزكوي</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-dep-review" value="review" checked>
+                            <label for="filter-dep-review">قسم المراجعة</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h3>حسب نوع المادة</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-type-video" value="video" checked>
+                            <label for="filter-type-video">مرئي/مسموع</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-type-read" value="read" checked>
+                            <label for="filter-type-read">مقروء</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-type-memo" value="memo" checked>
+                            <label for="filter-type-memo">محفوظ</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h3>حسب إكمال المادة</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-comp-completed" value="completed" checked>
+                            <label for="filter-comp-completed">أكملتها</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filter-comp-not-completed" value="not_completed" checked>
+                            <label for="filter-comp-not-completed">لم أكملها بعد</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="reset-filters-btn">إعادة تعيين</button>
+                    <button type="submit" class="btn btn-primary">تطبيق</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Confirm Delete Modal -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content">
@@ -527,11 +696,13 @@
             const allViewBtn = document.getElementById('all-view-btn');
             const myListViewBtn = document.getElementById('my-list-view-btn');
             const manageMyListBtn = document.getElementById('manage-my-list-btn');
+            const filterBtn = document.getElementById('filter-btn');
 
             // Modals
             const addEditModal = document.getElementById('add-edit-modal');
             const updateProgressModal = document.getElementById('update-progress-modal');
             const manageListModal = document.getElementById('manage-list-modal');
+            const filterModal = document.getElementById('filter-modal');
             const confirmModal = document.getElementById('confirm-modal');
             
             // Forms & Inputs
@@ -540,6 +711,8 @@
             const subjectNameInput = document.getElementById('subject-name');
             const subjectTotalInput = document.getElementById('subject-total');
             const subjectUnitInput = document.getElementById('subject-unit');
+            const subjectDepartmentInput = document.getElementById('subject-department');
+            const subjectTypeInput = document.getElementById('subject-type');
             const deleteSubjectBtn = document.getElementById('delete-subject-btn');
             
             const updateProgressForm = document.getElementById('update-progress-form');
@@ -552,6 +725,9 @@
             const manageListItemsContainer = document.getElementById('manage-list-items');
             const saveMyListBtn = document.getElementById('save-my-list-btn');
             
+            const filterForm = document.getElementById('filter-form');
+            const resetFiltersBtn = document.getElementById('reset-filters-btn');
+            
             const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
             const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 
@@ -561,36 +737,44 @@
             let currentView = 'all'; // 'all' or 'myList'
             let editingSubjectId = null;
             let subjectToDeleteId = null;
-            
+            let progressInputValueBeforeFocus = null;
+
+            const defaultFilters = {
+                departments: ['sharia', 'reform', 'spiritual', 'review'],
+                types: ['video', 'read', 'memo'],
+                completion: ['completed', 'not_completed']
+            };
+            let activeFilters = JSON.parse(JSON.stringify(defaultFilters));
+
             // --- Initial Data ---
             const initialSubjects = [
-                { name: 'المحاضرة الأولى من "الشرح المطول على نزهة النظر"', total: 1, unit: 'درس' },
-                { name: 'سلسلة "المداخل الأولية إلى علم الحديث"', total: 2, unit: 'درس' },
-                { name: 'محاضرة "التأسيس الحديثي"', total: 1, unit: 'درس' },
-                { name: 'الشرح القديم على البيقونية', total: 5, unit: 'درس' },
-                { name: 'سلسلة "شرح نخبة الفكر"', total: 6, unit: 'درس' },
-                { name: 'حفظ "عمدة الأحكام"', total: 241, unit: 'صفحة' },
-                { name: 'كتاب "المدخل إلى علم الحديث"', total: 214, unit: 'صفحة' },
-                { name: 'سلسلة "الحملة البريطانية على مصر"', total: 60, unit: 'درس' },
-                { name: 'سلسلة "جرعة وعي إلى الجيل الصاعد"', total: 3, unit: 'درس' },
-                { name: 'محاضرة "العلم بالله"', total: 1, unit: 'درس' },
-                { name: 'محاضرة "أتدري ما الله؟"', total: 1, unit: 'درس' },
-                { name: 'محاضرة "السر الأعظم"', total: 1, unit: 'درس' },
-                { name: 'كتاب "تفسير السعدي"', total: 17, unit: 'سورة' },
-                { name: 'مراجعة محفوظ "نظم الآجرومية"', total: 150, unit: 'بيت' },
-                { name: 'سلسلة "شرح نظم المعين على فهم تطبيقات المحدثين"', total: 7, unit: 'درس' },
-                { name: 'سلسلة "مدخل إلى فقه الحديث"', total: 3, unit: 'درس' },
-                { name: 'سلسلة "غيث الساري من هدايات البخاري"', total: 26, unit: 'درس' },
-                { name: 'كتاب "الفكر المنجي عند المحدثين"', total: 178, unit: 'صفحة' },
-                { name: 'سلسلة "مصدر التلقي والمعرفة"', total: 7, unit: 'درس' },
-                { name: 'سلسلة "الأسماء الحسنى"', total: 20, unit: 'درس' },
-                { name: 'محاضرة "المنهج الحديثي بين المتقدمين والمتأخرين"', total: 1, unit: 'درس' },
-                { name: 'كتاب "مناهج المحدثين"', total: 259, unit: 'صفحة' },
-                { name: 'كتاب "أفي السنة شك"', total: 93, unit: 'صفحة' },
-                { name: 'حفظ نظم "المعين على فهم تطبيقات المحدثين"', total: 153, unit: 'بيت' },
-                { name: 'كتاب "شرح منظومة لغة المحدث"', total: 469, unit: 'صفحة' },
-                { name: 'الشرح الجديد على البيقونية', total: 2, unit: 'درسان' },
-                { name: 'سلسلة "إحياء منهاج النبوة"', total: 6, unit: 'درس' },
+                { name: 'المحاضرة الأولى من "الشرح المطول على نزهة النظر"', total: 1, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'سلسلة "المداخل الأولية إلى علم الحديث"', total: 2, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'محاضرة "التأسيس الحديثي"', total: 1, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'الشرح القديم على البيقونية', total: 5, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'سلسلة "شرح نخبة الفكر"', total: 6, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'حفظ "عمدة الأحكام"', total: 241, unit: 'صفحة', department: 'sharia', type: 'memo' },
+                { name: 'كتاب "المدخل إلى علم الحديث"', total: 214, unit: 'صفحة', department: 'sharia', type: 'read' },
+                { name: 'سلسلة "الحملة البريطانية على مصر"', total: 60, unit: 'درس', department: 'reform', type: 'video' },
+                { name: 'سلسلة "جرعة وعي إلى الجيل الصاعد"', total: 3, unit: 'درس', department: 'reform', type: 'video' },
+                { name: 'محاضرة "العلم بالله"', total: 1, unit: 'درس', department: 'spiritual', type: 'video' },
+                { name: 'محاضرة "أتدري ما الله؟"', total: 1, unit: 'درس', department: 'spiritual', type: 'video' },
+                { name: 'محاضرة "السر الأعظم"', total: 1, unit: 'درس', department: 'spiritual', type: 'video' },
+                { name: 'كتاب "تفسير السعدي"', total: 17, unit: 'سورة', department: 'spiritual', type: 'read' },
+                { name: 'مراجعة محفوظ "نظم الآجرومية"', total: 150, unit: 'بيت', department: 'review', type: 'memo' },
+                { name: 'سلسلة "شرح نظم المعين على فهم تطبيقات المحدثين"', total: 7, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'سلسلة "مدخل إلى فقه الحديث"', total: 3, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'سلسلة "غيث الساري من هدايات البخاري"', total: 26, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'كتاب "الفكر المنجي عند المحدثين"', total: 178, unit: 'صفحة', department: 'sharia', type: 'read' },
+                { name: 'سلسلة "مصادر التلقي والمعرفة"', total: 7, unit: 'درس', department: 'reform', type: 'video' },
+                { name: 'سلسلة "الأسماء الحسنى"', total: 20, unit: 'درس', department: 'spiritual', type: 'video' },
+                { name: 'محاضرة "المنهج الحديثي بين المتقدمين والمتأخرين"', total: 1, unit: 'درس', department: 'sharia', type: 'video' },
+                { name: 'كتاب "مناهج المحدثين"', total: 259, unit: 'صفحة', department: 'sharia', type: 'read' },
+                { name: 'كتاب "أفي السنة شك"', total: 93, unit: 'صفحة', department: 'sharia', type: 'read' },
+                { name: 'حفظ نظم "المعين على فهم تطبيقات المحدثين"', total: 153, unit: 'بيت', department: 'sharia', type: 'memo' },
+                { name: 'كتاب "شرح منظومة لغة المحدث"', total: 469, unit: 'صفحة', department: 'sharia', type: 'read' },
+                { name: 'الشرح الجديد على البيقونية', total: 2, unit: 'درسان', department: 'sharia', type: 'video' },
+                { name: 'سلسلة "إحياء منهاج النبوة"', total: 6, unit: 'درس', department: 'reform', type: 'video' },
             ].map((subject, index) => ({
                 ...subject,
                 id: Date.now() + index,
@@ -608,6 +792,14 @@
                     saveData();
                 } else {
                     subjects = JSON.parse(data);
+                    // Migration for existing users: add new properties if missing
+                    subjects.forEach(s => {
+                        const template = initialSubjects.find(is => is.name === s.name);
+                        if(template) {
+                           if (!s.department) s.department = template.department;
+                           if (!s.type) s.type = template.type;
+                        }
+                    });
                 }
             };
 
@@ -615,11 +807,36 @@
                 localStorage.setItem('progressTrackerSubjects', JSON.stringify(subjects));
             };
             
+            const loadFilters = () => {
+                const savedFilters = localStorage.getItem('progressTrackerFilters');
+                if (savedFilters) {
+                    activeFilters = JSON.parse(savedFilters);
+                }
+            };
+            
+            const saveFilters = () => {
+                localStorage.setItem('progressTrackerFilters', JSON.stringify(activeFilters));
+            };
+            
             // --- Core Functions ---
             const render = () => {
                 subjectsList.innerHTML = '';
                 
-                const subjectsToDisplay = subjects.filter(subject => currentView === 'myList' ? subject.inMyList : true);
+                const isFilterActive = JSON.stringify(activeFilters) !== JSON.stringify(defaultFilters);
+                filterBtn.classList.toggle('active', isFilterActive);
+
+                const filteredByFilters = subjects.filter(subject => {
+                    const departmentMatch = activeFilters.departments.includes(subject.department);
+                    const typeMatch = activeFilters.types.includes(subject.type);
+                    
+                    const isCompleted = subject.completed >= subject.total;
+                    const completionStatus = isCompleted ? 'completed' : 'not_completed';
+                    const completionMatch = activeFilters.completion.includes(completionStatus);
+                    
+                    return departmentMatch && typeMatch && completionMatch;
+                });
+
+                const subjectsToDisplay = filteredByFilters.filter(subject => currentView === 'myList' ? subject.inMyList : true);
 
                 subjectsToDisplay.sort((a, b) => {
                     if (a.pinned && !b.pinned) return -1;
@@ -631,8 +848,10 @@
                     let message = '';
                     if (currentView === 'all' && subjects.length === 0) {
                         message = `<div class="empty-state"><p>لا توجد لديك مواد بعد.</p><p>انقر على زر '+' في الأسفل لإضافة مادة جديدة.</p></div>`;
-                    } else if (currentView === 'myList') {
+                    } else if (currentView === 'myList' && !subjects.some(s=>s.inMyList)) {
                          message = `<div class="empty-state"><p>"قائمتي" فارغة.</p><p>انقر على "إدارة قائمتي" لإضافة مواد إليها.</p></div>`;
+                    } else {
+                         message = `<div class="empty-state"><p>لا توجد مواد تطابق معايير التصفية الحالية.</p></div>`;
                     }
                     subjectsList.innerHTML = message;
                 }
@@ -702,6 +921,8 @@
                     subjectNameInput.value = subject.name;
                     subjectTotalInput.value = subject.total;
                     subjectUnitInput.value = subject.unit;
+                    subjectDepartmentInput.value = subject.department || 'sharia';
+                    subjectTypeInput.value = subject.type || 'video';
                     deleteSubjectBtn.style.display = 'inline-block';
                 }
                 openModal(addEditModal);
@@ -733,6 +954,23 @@
                 });
                 openModal(manageListModal);
             };
+            
+            const openFilterModal = () => {
+                // Populate checkboxes based on activeFilters state
+                filterForm.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    const value = cb.value;
+                    const id = cb.id;
+
+                    if (id.startsWith('filter-dep-')) {
+                        cb.checked = activeFilters.departments.includes(value);
+                    } else if (id.startsWith('filter-type-')) {
+                        cb.checked = activeFilters.types.includes(value);
+                    } else if (id.startsWith('filter-comp-')) {
+                        cb.checked = activeFilters.completion.includes(value);
+                    }
+                });
+                openModal(filterModal);
+            };
 
             // --- Event Handlers ---
 
@@ -740,6 +978,7 @@
             myListViewBtn.addEventListener('click', () => { currentView = 'myList'; render(); });
             manageMyListBtn.addEventListener('click', openManageListModal);
             addSubjectBtn.addEventListener('click', () => openAddEditModal('add'));
+            filterBtn.addEventListener('click', openFilterModal);
 
             subjectsList.addEventListener('click', (e) => {
                 const card = e.target.closest('.subject-card');
@@ -772,6 +1011,8 @@
                 const name = subjectNameInput.value.trim();
                 const total = parseInt(subjectTotalInput.value);
                 const unit = subjectUnitInput.value.trim();
+                const department = subjectDepartmentInput.value;
+                const type = subjectTypeInput.value;
 
                 if (!name || !unit || isNaN(total) || total < 1) return;
 
@@ -781,12 +1022,15 @@
                         subject.name = name;
                         subject.total = total;
                         subject.unit = unit;
+                        subject.department = department;
+                        subject.type = type;
                         subject.lastUpdated = Date.now();
                         if (subject.completed > total) subject.completed = total;
                     }
                 } else {
                     const newSubject = {
                         id: Date.now(), name, total, unit,
+                        department, type,
                         completed: 0, pinned: false, inMyList: false, lastUpdated: Date.now(),
                     };
                     subjects.push(newSubject);
@@ -800,16 +1044,21 @@
                 e.preventDefault();
                 const subject = subjects.find(s => s.id === editingSubjectId);
                 if (subject) {
-                    let newValue = parseInt(progressInput.value);
-                    if (isNaN(newValue) || newValue < 0) {
-                        newValue = 0;
-                    } else if (newValue > subject.total) {
-                        newValue = subject.total;
+                    const valueToParse = progressInput.value.trim() === '' ? progressInputValueBeforeFocus : progressInput.value;
+                    if (valueToParse !== null) {
+                        let newValue = parseInt(valueToParse, 10);
+                        if (!isNaN(newValue)) {
+                            if (newValue < 0) {
+                                newValue = 0;
+                            } else if (newValue > subject.total) {
+                                newValue = subject.total;
+                            }
+                            subject.completed = newValue;
+                            subject.lastUpdated = Date.now();
+                            saveData();
+                            render();
+                        }
                     }
-                    subject.completed = newValue;
-                    subject.lastUpdated = Date.now();
-                    saveData();
-                    render();
                 }
                 closeModal(updateProgressModal);
             });
@@ -827,6 +1076,17 @@
                 const minValue = parseInt(progressInput.min);
                 if (!isNaN(currentValue) && currentValue > minValue) {
                     progressInput.value = currentValue - 1;
+                }
+            });
+            
+            progressInput.addEventListener('focus', (e) => {
+                progressInputValueBeforeFocus = e.target.value;
+                e.target.value = '';
+            });
+
+            progressInput.addEventListener('blur', (e) => {
+                if (e.target.value.trim() === '') {
+                    e.target.value = progressInputValueBeforeFocus;
                 }
             });
 
@@ -876,6 +1136,21 @@
                 render();
                 closeModal(manageListModal);
             });
+            
+            filterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                activeFilters.departments = Array.from(filterForm.querySelectorAll('input[id^="filter-dep"]:checked')).map(cb => cb.value);
+                activeFilters.types = Array.from(filterForm.querySelectorAll('input[id^="filter-type"]:checked')).map(cb => cb.value);
+                activeFilters.completion = Array.from(filterForm.querySelectorAll('input[id^="filter-comp"]:checked')).map(cb => cb.value);
+                
+                saveFilters();
+                render();
+                closeModal(filterModal);
+            });
+            
+            resetFiltersBtn.addEventListener('click', () => {
+                filterForm.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            });
 
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.addEventListener('click', (e) => {
@@ -887,6 +1162,10 @@
 
             // --- Initial Load ---
             loadData();
+            loadFilters();
+            if (subjects.some(s => s.inMyList)) {
+                currentView = 'myList';
+            }
             render();
 
             // PWA Service Worker Registration
