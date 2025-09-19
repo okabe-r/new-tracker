@@ -525,12 +525,11 @@
                 justify-content: flex-end;
             }
 
-            .modal-overlay.keyboard-active {
-                align-items: flex-start;
-                padding-top: 15px;
-            }
+            /* Replaced keyboard handling to use transform.
+               This prevents layout shifts that could cause the modal to
+               close unexpectedly on browsers like Chrome mobile. */
             .modal-overlay.keyboard-active .modal-content {
-                margin-bottom: 15px;
+                transform: scale(1) translateY(-100px);
             }
         }
     </style>
