@@ -343,7 +343,7 @@
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            transition: opacity 0.3s, visibility 0.3s, align-items 0.3s;
         }
 
         .modal-overlay.visible {
@@ -523,6 +523,14 @@
             }
             .action-buttons {
                 justify-content: flex-end;
+            }
+
+            .modal-overlay.keyboard-active {
+                align-items: flex-start;
+                padding-top: 15px;
+            }
+            .modal-overlay.keyboard-active .modal-content {
+                margin-bottom: 15px;
             }
         }
     </style>
@@ -852,7 +860,7 @@
                 { name: 'كتاب «دلائل أصول الإسلام»', total: 504, unit: 'صفحة', department: 'sharia', type: 'read' },
                 { name: 'كتاب «خلاصة مفاهيم أهل السنة والجماعة»', total: 210, unit: 'صفحة', department: 'sharia', type: 'read' },
                 { name: 'حفظ «ملحق المنهاج من ميراث النبوة»', total: 28, unit: 'صفحة', department: 'sharia', type: 'memo' },
-                { name: 'حفظ المجلد الأول من كتاب «الجمع بين الصحيحين»', total: 188, unit: 'صفحة', department: 'sharia', type: 'memo' },
+                { name: 'حفظ المجلد الأول من كتاب «الجمع بين الصحيحين»', total: 88, unit: 'صفحة', department: 'sharia', type: 'memo' },
                 // Reform
                 { name: 'سلسلة «مركزيات الإصلاح»', total: 13, unit: 'درس', department: 'reform', type: 'video' },
                 { name: 'كتاب «بوصلة المصلح»', total: 262, unit: 'صفحة', department: 'reform', type: 'read' },
@@ -1361,6 +1369,33 @@
                     }
                 });
             });
+
+            // --- Mobile keyboard adjustment for modals ---
+            const setupKeyboardHandlers = (modal) => {
+                modal.addEventListener('focusin', (e) => {
+                    if (window.innerWidth <= 600 && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) {
+                        modal.classList.add('keyboard-active');
+                    }
+                });
+
+                modal.addEventListener('focusout', (e) => {
+                     if (window.innerWidth <= 600 && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) {
+                        // Use a small timeout to check if focus has moved to another element within the same modal.
+                        // If focus has left the inputs, it means the keyboard is likely closing.
+                        setTimeout(() => {
+                            const activeElement = document.activeElement;
+                            const isFocusInsideModalInputs = modal.contains(activeElement) && 
+                                                             (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT');
+
+                            if (!isFocusInsideModalInputs) {
+                                modal.classList.remove('keyboard-active');
+                            }
+                        }, 50);
+                    }
+                });
+            };
+            
+            [addEditModal, updateProgressModal].forEach(setupKeyboardHandlers);
 
             // --- Initial Load ---
             loadData();
